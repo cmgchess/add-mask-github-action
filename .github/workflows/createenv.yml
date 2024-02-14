@@ -1,0 +1,37 @@
+name: Test action
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: create env file
+        env:
+          VAR_ONE: ${{ vars.VAR_ONE }}
+          VAR_TWO: ${{ vars.VAR_TWO }}
+          SECRET_ONE: ${{ secrets.SECRET_ONE }}
+        
+        run: |
+          touch .env
+          echo VAR_ONE: $VAR_ONE > .env
+          echo VAR_TWO: $VAR_TWO >> .env
+          echo SECRET_ONE: $SECRET_ONE >> .env
+
+      - name: Create Branch and Push Changes
+        run: |
+          DATE=$(date +"%Y%m%d%H%M%S")
+          BRANCH_NAME="update-data-${DATE}"
+          git config --global user.email "${{ github.repository_owner }}@users.noreply.github.com"
+          git config --global user.name "${{ github.repository_owner }}"
+          git branch $BRANCH_NAME
+          git checkout $BRANCH_NAME
+          git add .
+          git commit -m "${DATE} update"
+          git push origin $BRANCH_NAME
+  
